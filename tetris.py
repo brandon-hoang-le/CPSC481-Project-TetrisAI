@@ -12,7 +12,7 @@ from tetrisAI import *
 
 pygame.init()
 pygame.font.init()
-
+mainBoard = None
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
@@ -34,7 +34,8 @@ STARTING_LEVEL = 0  # Change this to start a new game at a higher level
 
 # Piece movement speed when up/right/left arrow keys are pressed (Speed is defined as frame count. Game is 60 fps)
 
-MOVE_PERIOD_INIT = 4
+# MOVE_PERIOD_INIT = 10
+MOVE_PERIOD_INIT = 10
 
 CLEAR_ANI_PERIOD = 4  # Line clear animation speed
 SINE_ANI_PERIOD = 120  # Sine blinking effect speed
@@ -911,6 +912,9 @@ class MovingPiece:
             self.status = 'moving'
             self.blockMat = lastBlockMat
             self.spawn()
+            global mainBoard
+            if mainBoard != None:
+                run_ai(mainBoard, mainBoard.colNum, mainBoard.rowNum)
         elif self.status == 'moving':
 
             if key.down.status == 'pressed':
@@ -1008,7 +1012,7 @@ def gameLoop():
     scoreBoardWidth = blockSize * (boardColNum // 2)
     boardPosX = DISPLAY_WIDTH * 0.3
     boardPosY = DISPLAY_HEIGHT * 0.15
-
+    global mainBoard
     mainBoard = MainBoard(
         blockSize,
         boardPosX,
@@ -1083,7 +1087,7 @@ def gameLoop():
         #         else:
         #             key.xNav.status = 'idle'
         # else:
-        for event in list(pygame.event.get()) + run_ai(mainBoard, boardColNum, boardRowNum):
+        for event in list(pygame.event.get()):
 
             # Looks for quitting event in every iteration (Meaning closing the game window)
 
@@ -1116,23 +1120,23 @@ def gameLoop():
                 if event.key == pygame.K_RETURN:
                     key.enter.status = 'pressed'
 
-            # if event.type == pygame.KEYUP:  # Keyboard keys release events
-            #     if event.key == pygame.K_LEFT:
-            #         xChange += 1
-            #     if event.key == pygame.K_RIGHT:
-            #         xChange += -1
-            #     if event.key == pygame.K_DOWN:
-            #         key.down.status = 'released'
-            #     if event.key == pygame.K_UP:
-            #         key.rotate.status = 'idle'
-            #     if event.key == pygame.K_z:
-            #         key.cRotate.status = 'idle'
-            #     if event.key == pygame.K_p:
-            #         key.pause.status = 'idle'
-            #     if event.key == pygame.K_r:
-            #         key.restart.status = 'idle'
-            #     if event.key == pygame.K_RETURN:
-            #         key.enter.status = 'idle'
+            if event.type == pygame.KEYUP:  # Keyboard keys release events
+                if event.key == pygame.K_LEFT:
+                    xChange += 1
+                if event.key == pygame.K_RIGHT:
+                    xChange += -1
+                if event.key == pygame.K_DOWN:
+                    key.down.status = 'released'
+                if event.key == pygame.K_UP:
+                    key.rotate.status = 'idle'
+                if event.key == pygame.K_z:
+                    key.cRotate.status = 'idle'
+                if event.key == pygame.K_p:
+                    key.pause.status = 'idle'
+                if event.key == pygame.K_r:
+                    key.restart.status = 'idle'
+                if event.key == pygame.K_RETURN:
+                    key.enter.status = 'idle'
 
             if xChange > 0:
                 key.xNav.status = 'right'
