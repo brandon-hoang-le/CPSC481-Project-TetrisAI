@@ -135,6 +135,20 @@ def simulate(game, game_width, game_height):
             a_height, cleared, holes, bumpiness = calc(
                 blockMat, game_width, game_height)
             rating = genericAlgorithm(a_height, cleared, holes, bumpiness)
+            cl = game2.getCompleteLines()
+            line_cleared = 0
+            for i in range(4):
+                if cl[i] != -1:
+                    line_cleared += 1
+                    print(cl)
+            if line_cleared > 0:
+                for line in cl:
+                    if line != -1:
+                        for row in range(game_width):
+                            blockMat[line][row] = 'empty'
+                # simulate drop blocks
+
+                print(blockMat)
             if best_rating is None or rating > best_rating:
                 best_rating = rating
                 cur_pos = [0] * 4
