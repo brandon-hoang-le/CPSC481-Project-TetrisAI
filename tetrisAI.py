@@ -6,6 +6,8 @@ import time
 ROW = 0
 COL = 1
 
+total_hole = 0
+
 
 class Event():
     type = None
@@ -16,9 +18,13 @@ class Event():
         self.key = key
 
 
-def genericAlgorithm(height, complete_lines, holes, bumpiness):
+def genericAlgorithm(height, complete_lines, holes, bumpiness, max_height):
     return height * -0.510066 + complete_lines * \
-        0.760666 + holes * -0.35663 + bumpiness * -0.184483
+        0.760666 + holes * -0.35663 + bumpiness * -0.184483 + max_height * -0.001
+
+# def genericAlgorithm(a_height, complete_lines, holes, bumpiness, max_height):
+#     return a_height * -0.310066 * max_height*0.1 + complete_lines * \
+#         1.860666 + holes * -0.75663 + bumpiness * -0.184483 + max_height * -0.01
 
 
 counter = 0
@@ -112,6 +118,7 @@ def simulate(game, game_width, game_height):
     best_position = None
     best_rotation = None
     best_rating = None
+    best_blockMat = None
     best_data = []
     cur_rotation = 0
     for x in range(4):
@@ -132,23 +139,24 @@ def simulate(game, game_width, game_height):
             for i in range(4):
                 blockMat[piece.blocks[i].currentPos.row
                          ][piece.blocks[i].currentPos.col] = 'SIM'
-            a_height, cleared, holes, bumpiness = calc(
+            a_height, cleared, holes, bumpiness, highest = calc(
                 blockMat, game_width, game_height)
-            rating = genericAlgorithm(a_height, cleared, holes, bumpiness)
-            cl = game2.getCompleteLines()
-            line_cleared = 0
-            for i in range(4):
-                if cl[i] != -1:
-                    line_cleared += 1
-                    print(cl)
-            if line_cleared > 0:
-                for line in cl:
-                    if line != -1:
-                        for row in range(game_width):
-                            blockMat[line][row] = 'empty'
-                # simulate drop blocks
-
-                print(blockMat)
+            rating = genericAlgorithm(
+                a_height, cleared, holes, bumpiness, highest)
+            # cl = game2.getCompleteLines()
+            # line_cleared = 0
+            # for i in range(4):
+            #     if cl[i] != -1:
+            #         line_cleared += 1
+            # if line_cleared > 0:
+            #     remove_count = 0
+            #     for line in cl:
+            #         if line != -1:
+            #             for height in range(line, -1, -1):
+            #                 # blockMat[line - remove_count][row] = 'empty'
+            #                 for row in range(game_width):
+            #                     blockMat[height - remove_count][row] = blockMat[height -
+            #                                                                     remove_count - 1][row]
             if best_rating is None or rating > best_rating:
                 best_rating = rating
                 cur_pos = [0] * 4
@@ -156,7 +164,12 @@ def simulate(game, game_width, game_height):
                     cur_pos[i] = piece.blocks[i].currentPos.col
                 best_position = cur_pos
                 best_rotation = cur_rotation
-                best_data = [a_height, cleared, holes, bumpiness]
+                best_blockMat = blockMat
+                best_data = [a_height, cleared, holes,
+                             bumpiness, highest, best_rating]
+                if cleared > 0:
+                    print(blockMat)
+
             if not gameXp.movCollisionCheck("right"):
                 gameXp.createNextMove('right')
                 gameXp.applyNextMove()
@@ -164,26 +177,10 @@ def simulate(game, game_width, game_height):
                 break
         game1.piece.rotate("CW")
         cur_rotation += 1
-    print("best height:", best_data[0], "best cleared:", best_data[1],
-          "best holes:", best_data[2], "best bumpiness:", best_data[3])
+    print("aggregate height:", best_data[0], "line cleared:", best_data[1],
+          "holes:", best_data[2], "bumpiness:", best_data[3], 'highest height:', best_data[4], 'value:', best_data[5])
+    # print(best_blockMat)
     return best_position, best_rotation
-
-
-def calc_heights(blockMat, game_width, game_height):
-    height = []
-    for i in range(game_height-1, -1, -1):
-        found_height = False
-        for j in range(0, game_width):
-            if blockMat[i][j] != 'empty':
-                height.append(game_height - i)
-                found_height = True
-                break
-        if not found_height:
-            height.append(0)
-    a_height = 0
-    for h in height:
-        a_height += h
-    return a_height
 
 
 def calc_all_heights(blockMat, game_width, game_height):
@@ -197,24 +194,30 @@ def calc_all_heights(blockMat, game_width, game_height):
 
 def calc(blockMat, game_width, game_height):
     h = calc_all_heights(blockMat, game_width, game_height)
+    # calculate aggregate height
     max_height = max(h)
     a_height = 0
     for height in h:
         a_height += height
-    # calculate # wells
-    well = []
-    for i in range(0, len(h) - 1):
-        if i == 0:
-            if h[i+1] - h[i] >= 3:
-                well.append(i)
-        elif i == game_width - 1:
-            if h[i-1] - h[i] >= 3:
-                well.append(i)
-        elif abs(h[i] - h[i+1]) >= 3 and abs(h[i] - h[i-1]) >= 3:
-            well.append(i)
+
+    # calculate highest height
+    highest_height = max(h)
+
+    # calculate number of wells
+    # well = []
+    # for i in range(0, len(h) - 1):
+    #     if i == 0:
+    #         if h[i+1] - h[i] >= 3:
+    #             well.append(i)
+    #     elif i == game_width - 1:
+    #         if h[i-1] - h[i] >= 3:
+    #             well.append(i)
+    #     elif abs(h[i] - h[i+1]) >= 3 and abs(h[i] - h[i-1]) >= 3:
+    #         well.append(i)
+
     # calculate bumpiness
     bumpiness = 0
-    for i in range(0, len(h) - 2):
+    for i in range(0, len(h) - 1):
         bumpiness += abs(h[i] - h[i+1])
     # calculate lines cleared
     cleared = 0
@@ -226,43 +229,13 @@ def calc(blockMat, game_width, game_height):
             zeros += 1
         if zeros == game_width:
             cleared += 1
-    # calculate holes DOESNT work as intended for now
+    # calculate height
     holes = 0
-    # filled = []
-    # breaks = 0
-    # for i in range(game_height-1, -1, -1):
-    #     it_is_full = True
-    #     prev_holes = holes
-    #     for j in range(game_width):
-    #         u = '_'
-    #         if blockMat[i][j] != 0:
-    #             u = "x"
-    #         for ii in range(4):
-    #             for jj in range(4):
-    #                 if ii * 4 + jj in blockMat:
-    #                     if jj + x == j and ii + y == i:
-    #                         u = "x"
-
-    #         if u == "x" and i < height:
-    #             height = i
-    #         if u == "x":
-    #             filled.append((i, j))
-    #             for k in range(i, game_height):
-    #                 if (k, j) not in filled:
-    #                     holes += 1
-    #                     filled.append((k, j))
-    #         else:
-    #             it_is_full = False
-    #     if it_is_full:
-    #         breaks += 1
-    #         holes = prev_holes
-    for i in range(max_height):
-        h = game_height - 1 - max_height
-        for j in range(game_width):
-            try:
-                if blockMat[i][j] == "empty":
-                    if (j-1 > 0 or blockMat[i][j-1] != "empty") and (j+1 < game_width and i > 0 or blockMat[i][j+1] != "empty") and (i-1 >= 0 and blockMat[i - 1][j] != "empty"):
-                        holes += 1
-            except Exception as e:
-                pass
-    return a_height, cleared, holes, bumpiness
+    for c in range(game_width):
+        block = False
+        for r in range(game_height - 1, -1, -1):
+            if (blockMat[r][c] == 'empty'):
+                block = True
+            elif (blockMat[r][c] != 'empty' and block):
+                holes += 1
+    return a_height, cleared, holes, bumpiness, highest_height
