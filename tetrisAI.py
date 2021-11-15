@@ -22,10 +22,6 @@ def genericAlgorithm(height, complete_lines, holes, bumpiness, max_height):
     return height * -0.510066 + complete_lines * \
         0.760666 + holes * -0.35663 + bumpiness * -0.184483 + max_height * -0.001
 
-# def genericAlgorithm(a_height, complete_lines, holes, bumpiness, max_height):
-#     return a_height * -0.310066 * max_height*0.1 + complete_lines * \
-#         1.860666 + holes * -0.75663 + bumpiness * -0.184483 + max_height * -0.01
-
 
 counter = 0
 
@@ -38,24 +34,7 @@ def run_ai(game_field, game_width, game_height):
         return []
     rotation_count = 0
     best_pos, best_rotation = simulate(game_field, game_width, game_height)
-    # best_pos = [1, 1, 1, 1]
-    # best_rotation = 0
-    # print(best_pos, best_rotation)
-    # if 0 != best_rotation:
-    #     e.append(Event(pygame.KEYDOWN, pygame.K_UP))
-    #     e.append(Event(pygame.KEYUP, pygame.K_UP))
-    # elif game_field.piece.blocks[0].currentPos.col < best_pos[0]:
-    #     e.append(Event(pygame.KEYDOWN, pygame.K_RIGHT))
-    #     # e.append(Event(pygame.KEYUP, pygame.K_RIGHT))
-    # elif game_field.piece.blocks[0].currentPos.col > best_pos[0]:
-    #     e.append(Event(pygame.KEYDOWN, pygame.K_LEFT))
-    #     # e.append(Event(pygame.KEYUP, pygame.K_LEFT))
-    # else:
-    #     e.append(Event(pygame.KEYDOWN, pygame.K_DOWN))
-    #     # e.append(Event(pygame.KEYUP, pygame.K_DOWN))
-    # print(game_field.piece.blocks[0].currentPos.col,
-    #       best_pos[0], best_rotation)
-    # return e
+
     for i in range(best_rotation):
         time.sleep(0.2)
         game_field.piece.rotate("CW")
@@ -72,32 +51,7 @@ def run_ai(game_field, game_width, game_height):
     while not game_field.piece.movCollisionCheck("down"):
         game_field.piece.createNextMove('down')
         game_field.piece.applyNextMove()
-    # while(True):
-    #     # print(game_field.piece.blocks[0].currentPos.col,
-    #     #       best_pos[0], best_rotation)
-    #     time.sleep(0.4)
-    #     print(game_field.piece.blocks[0].currentPos.col,
-    #           best_pos[0], best_rotation)
-    #     if game_field.piece.blocks[0].currentPos.row == best_pos[0]:
-    #         print('break')
-    #         print(game_field.piece.blocks[0].currentPos.col,
-    #               best_pos[0], best_rotation)
-    #         break
-    #     elif game_field.piece.blocks[0].currentPos.row > best_pos[0]:
-    #         game_field.piece.createNextMove('right')
-    #         game_field.piece.applyNextMove()
-    #     elif game_field.piece.blocks[0].currentPos.row < best_pos[0]:
-    #         game_field.piece.createNextMove('left')
-    #         game_field.piece.applyNextMove()
-    #     else:
-    #         break
 
-    # else:
-        # game_field.piece.createNextMove('down')
-        # game_field.piece.applyNextMove()
-
-    # diff = game_field.piece
-    # if(game_field)
     return[]
 
 
@@ -143,20 +97,25 @@ def simulate(game, game_width, game_height):
                 blockMat, game_width, game_height)
             rating = genericAlgorithm(
                 a_height, cleared, holes, bumpiness, highest)
-            # cl = game2.getCompleteLines()
-            # line_cleared = 0
-            # for i in range(4):
-            #     if cl[i] != -1:
-            #         line_cleared += 1
-            # if line_cleared > 0:
-            #     remove_count = 0
-            #     for line in cl:
-            #         if line != -1:
-            #             for height in range(line, -1, -1):
-            #                 # blockMat[line - remove_count][row] = 'empty'
-            #                 for row in range(game_width):
-            #                     blockMat[height - remove_count][row] = blockMat[height -
-            #                                                                     remove_count - 1][row]
+            #  This should clear all the lines
+            cl = game2.getCompleteLines()
+            line_cleared = 0
+            for i in range(4):
+                if cl[i] != -1:
+                    line_cleared += 1
+
+            #  This should clears the rows
+            if line_cleared > 0:
+                remove_count = 0
+                for line in cl:
+                    if line != -1:
+                        for height in range(line, -1, -1):
+                            for row in range(game_width):
+                                blockMat[line - remove_count][row] = 'empty'
+                            # # This should  move verything down but it doesnt
+                            for r in range(game_width):
+                                blockMat[height - remove_count][r] = blockMat[height -
+                                                                              remove_count - 1][r]
             if best_rating is None or rating > best_rating:
                 best_rating = rating
                 cur_pos = [0] * 4
