@@ -111,7 +111,7 @@ def simulate(game, game_width, game_height):
                     if line != -1:
                         for height in range(line, -1, -1):
                             for row in range(game_width):
-                                blockMat[line - remove_count][row] = 'empty'
+                                blockMat[line][row] = 'empty'
                             # # This should  move verything down but it doesnt
                             for r in range(game_width):
                                 blockMat[height - remove_count][r] = blockMat[height -
