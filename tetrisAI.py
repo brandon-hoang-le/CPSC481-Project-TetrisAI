@@ -74,12 +74,11 @@ def simulate(game, game_width, game_height):
             if line_cleared > 0:
                 for row in cl:
                     if row != -1:
-                        for col in range(game_width):
-                            blockMat[row][col] = 'empty'
                         # This clears completed row from blockMat and inserts new empty list to blockMat (pushing everything down)
-                        blockMat.pop(row)
-                        blockMat.insert(0,['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'])
-
+                        for i in range(line_cleared):
+                            blockMat.pop(row)
+                            blockMat.insert(0,['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'])
+            
             if best_rating is None or rating > best_rating:
                 best_rating = rating
                 cur_pos = [0] * 4
