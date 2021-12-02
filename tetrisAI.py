@@ -3,42 +3,24 @@ import pygame
 import copy
 import time
 
-ROW = 0
-COL = 1
 
-total_hole = 0
-
-
-class Event():
-    type = None
-    key = None
-
-    def __init__(self, type, key):
-        self.type = type
-        self.key = key
-
-
-def genericAlgorithm(height, complete_lines, holes, bumpiness, max_height):
+def geneticAlgorithm(height, complete_lines, holes, bumpiness, max_height):
     return height * -0.510066 + complete_lines * \
         0.760666 + holes * -0.35663 + bumpiness * -0.184483 + max_height * -0.001
-
-
-counter = 0
 
 
 def run_ai(game_field, game_width, game_height):
     game_field.piece.createNextMove('down')
     game_field.piece.applyNextMove()
-    e = []
     if game_field.piece.status != 'moving':
         return []
-    rotation_count = 0
-    best_pos, best_rotation = simulate(game_field, game_width, game_height)
 
+    # simulate all possible outcomes
+    best_pos, best_rotation = simulate(game_field, game_width, game_height)
+    # apply drop
     for i in range(best_rotation):
         time.sleep(0.2)
         game_field.piece.rotate("CW")
-
     shift = game_field.piece.blocks[0].currentPos.col - best_pos[0]
     if shift > 0:
         for i in range(shift):
@@ -51,19 +33,7 @@ def run_ai(game_field, game_width, game_height):
     while not game_field.piece.movCollisionCheck("down"):
         game_field.piece.createNextMove('down')
         game_field.piece.applyNextMove()
-
     return[]
-
-
-pieceDefs = {
-    'I': ((1, 0), (1, 1), (1, 2), (1, 3)),
-    'O': ((0, 1), (0, 2), (1, 1), (1, 2)),
-    'T': ((0, 1), (1, 0), (1, 1), (1, 2)),
-    'S': ((0, 1), (0, 2), (1, 0), (1, 1)),
-    'Z': ((0, 0), (0, 1), (1, 1), (1, 2)),
-    'J': ((0, 0), (1, 0), (1, 1), (1, 2)),
-    'L': ((0, 2), (1, 0), (1, 1), (1, 2)),
-}
 
 
 def simulate(game, game_width, game_height):
@@ -75,6 +45,7 @@ def simulate(game, game_width, game_height):
     best_blockMat = None
     best_data = []
     cur_rotation = 0
+    # simulate all 4 rotations
     for x in range(4):
         rotate_count = 0
         gameX = copy.deepcopy(game1)
@@ -82,18 +53,19 @@ def simulate(game, game_width, game_height):
         while not gameXp.movCollisionCheck("left"):
             gameXp.createNextMove('left')
             gameXp.applyNextMove()
+        # simulate all columns
         for ii in range(game_width):
+            # place simulated blocks
             game2 = copy.deepcopy(gameX)
             piece = game2.piece
             blockMat = game2.blockMat
             while not piece.movCollisionCheck("down"):
                 piece.createNextMove('down')
                 piece.applyNextMove()
-            string = ""
             for i in range(4):
                 blockMat[piece.blocks[i].currentPos.row
                          ][piece.blocks[i].currentPos.col] = 'SIM'
-
+            # if there are rows beling cleared, clear and drop free blocks
             cl = game2.getCompleteLines()
             cl.sort(reverse=True)
             line_cleared = 0
@@ -102,39 +74,19 @@ def simulate(game, game_width, game_height):
                     line_cleared += 1
                 else:
                     break
-
             if line_cleared > 0:
-               #  This should clears the rows
                 for i in range(line_cleared):
                     blockMat.pop(cl[i])
                 for i in range(line_cleared):
                     blockMat.insert(0, ['empty', 'empty', 'empty', 'empty',
                                         'empty', 'empty', 'empty', 'empty', 'empty', 'empty'])
-                print(blockMat)
+            # calculate agregate height, buumpiness, highest height,and holes
             a_height, cleared, holes, bumpiness, highest = calc(
                 blockMat, game_width, game_height)
-            rating = genericAlgorithm(
+            # calculate the rating of this simulation through genetic algorithm
+            rating = geneticAlgorithm(
                 a_height, line_cleared, holes, bumpiness, highest)
-            #  This should clear all the lines
-            # cl = game2.getCompleteLines()
-            # line_cleared = 0
-            # for i in range(4):
-            #     if cl[i] != -1:
-            #         line_cleared += 1
-
-            # #  This should clears the rows
-            # if line_cleared > 0:
-            #     remove_count = 0
-            #     for line in cl:
-            #         if line != -1:
-            #             for height in range(line, -1, -1):
-            #                 for row in range(game_width):
-            #                     blockMat[line][row] = 'empty'
-            #                 # # This should  move verything down but it doesnt
-            #                 for r in range(game_width):
-            #                     blockMat[height - remove_count][r] = blockMat[height -
-            #                                                                   remove_count - 1][r]
-
+            # record the best simulation
             if best_rating is None or rating > best_rating:
                 best_rating = rating
                 cur_pos = [0] * 4
@@ -145,8 +97,6 @@ def simulate(game, game_width, game_height):
                 best_blockMat = blockMat
                 best_data = [a_height, cleared, holes,
                              bumpiness, highest, best_rating]
-                if cleared > 0:
-                    print(blockMat)
 
             if not gameXp.movCollisionCheck("right"):
                 gameXp.createNextMove('right')
@@ -157,7 +107,7 @@ def simulate(game, game_width, game_height):
         cur_rotation += 1
     print("aggregate height:", best_data[0], "line cleared:", best_data[1],
           "holes:", best_data[2], "bumpiness:", best_data[3], 'highest height:', best_data[4], 'value:', best_data[5])
-    # print(best_blockMat)
+    print(best_blockMat)
     return best_position, best_rotation
 
 
