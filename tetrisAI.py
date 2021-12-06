@@ -1,7 +1,7 @@
 import copy
 import time
 
-def combine_heuristics(height, complete_lines, holes, bumpiness, max_height):
+def score(height, complete_lines, holes, bumpiness, max_height):
     return height * -0.510066 + complete_lines * \
         0.760666 + holes * -0.35663 + bumpiness * -0.184483 + max_height * -0.001
 
@@ -79,7 +79,7 @@ def simulate(game, game_width, game_height):
             a_height, cleared, holes, bumpiness, highest = calc_heuristics(
                 blockMat, game_width, game_height)
             # calculate the rating of this simulation through genetic algorithm
-            rating = combine_heuristics(
+            rating = score(
                 a_height, line_cleared, holes, bumpiness, highest)
             # record the best simulation
             if best_rating is None or rating > best_rating:
