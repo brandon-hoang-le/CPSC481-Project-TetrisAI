@@ -131,22 +131,11 @@ def calc(blockMat, game_width, game_height):
     # calculate highest height
     highest_height = max(h)
 
-    # calculate number of wells
-    # well = []
-    # for i in range(0, len(h) - 1):
-    #     if i == 0:
-    #         if h[i+1] - h[i] >= 3:
-    #             well.append(i)
-    #     elif i == game_width - 1:
-    #         if h[i-1] - h[i] >= 3:
-    #             well.append(i)
-    #     elif abs(h[i] - h[i+1]) >= 3 and abs(h[i] - h[i-1]) >= 3:
-    #         well.append(i)
-
     # calculate bumpiness
     bumpiness = 0
     for i in range(0, len(h) - 1):
         bumpiness += abs(h[i] - h[i+1])
+        
     # calculate lines cleared
     cleared = 0
     for i in range(game_height - 1, -1, -1):
@@ -157,7 +146,8 @@ def calc(blockMat, game_width, game_height):
             zeros += 1
         if zeros == game_width:
             cleared += 1
-    # calculate height
+            
+    # calculate holes
     holes = 0
     for c in range(game_width):
         block = False
