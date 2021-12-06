@@ -3,14 +3,14 @@ Implemented Tetris AI approach based on Yiyuan Lee's [Tetris AI](https://codemyr
 
 Base tetris code (**tetris.py**) created by ibrahimAtespare's [Tetris Python Game](https://github.com/ibrahimAtespare/tetris-python).
 
-## How it works:
+## How it works
 Rating system using 5 heuristics: AggregateHeight, CompleteLines, Holes, Bumpiness, MaxHeight
 - highest score is chosen as best possible move
 - score = **a**(AggregateHeight)+**b**(CompleteLines)+**c**(Holes)+**d**(Bumpiness)+**e**(MaxHeight)
   - Optimal parameters given from Genetic Algorithm
   - Added e parameter and MaxHeight to prevent blocks from stacking too high
 
-## How it can be improved:
+## How it can be improved
 Ideas:
 - Simulate the next block ahead of time
 - Improve heuristics
