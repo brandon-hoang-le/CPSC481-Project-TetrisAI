@@ -1,7 +1,7 @@
 # CPSC481 Tetris AI
 Implemented Tetris AI approach based on Yiyuan Lee's [Tetris AI](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/).
 
-Base Code: ibrahimAtespare's [Tetris Python Game](https://github.com/ibrahimAtespare/tetris-python)
+Base tetris code (**tetris.py**) created by ibrahimAtespare's [Tetris Python Game](https://github.com/ibrahimAtespare/tetris-python).
 
 ## How it works:
 Rating system using 5 heuristics: AggregateHeight, CompleteLines, Holes, Bumpiness, MaxHeight
