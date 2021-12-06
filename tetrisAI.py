@@ -1,13 +1,9 @@
-from math import e
-import pygame
 import copy
 import time
 
-
-def geneticAlgorithm(height, complete_lines, holes, bumpiness, max_height):
+def score(height, complete_lines, holes, bumpiness, max_height):
     return height * -0.510066 + complete_lines * \
         0.760666 + holes * -0.35663 + bumpiness * -0.184483 + max_height * -0.001
-
 
 def run_ai(game_field, game_width, game_height):
     game_field.piece.createNextMove('down')
@@ -47,7 +43,6 @@ def simulate(game, game_width, game_height):
     cur_rotation = 0
     # simulate all 4 rotations
     for x in range(4):
-        rotate_count = 0
         gameX = copy.deepcopy(game1)
         gameXp = gameX.piece
         while not gameXp.movCollisionCheck("left"):
@@ -81,10 +76,10 @@ def simulate(game, game_width, game_height):
                     blockMat.insert(0, ['empty', 'empty', 'empty', 'empty',
                                         'empty', 'empty', 'empty', 'empty', 'empty', 'empty'])
             # calculate agregate height, buumpiness, highest height,and holes
-            a_height, cleared, holes, bumpiness, highest = calc(
+            a_height, cleared, holes, bumpiness, highest = calc_heuristics(
                 blockMat, game_width, game_height)
             # calculate the rating of this simulation through genetic algorithm
-            rating = geneticAlgorithm(
+            rating = score(
                 a_height, line_cleared, holes, bumpiness, highest)
             # record the best simulation
             if best_rating is None or rating > best_rating:
@@ -120,10 +115,10 @@ def calc_all_heights(blockMat, game_width, game_height):
     return height
 
 
-def calc(blockMat, game_width, game_height):
+def calc_heuristics(blockMat, game_width, game_height):
     h = calc_all_heights(blockMat, game_width, game_height)
+
     # calculate aggregate height
-    max_height = max(h)
     a_height = 0
     for height in h:
         a_height += height
