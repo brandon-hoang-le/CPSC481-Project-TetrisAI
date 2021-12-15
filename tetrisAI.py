@@ -81,9 +81,11 @@ def simulate(game, game_width, game_height):
             # calculate the rating of this simulation through genetic algorithm
             rating = score(
                 a_height, line_cleared, holes, bumpiness, highest)
+
             # record the best simulation
             if best_rating is None or rating > best_rating:
                 best_rating = rating
+                
                 cur_pos = [0] * 4
                 for i in range(4):
                     cur_pos[i] = piece.blocks[i].currentPos.col
@@ -100,9 +102,11 @@ def simulate(game, game_width, game_height):
                 break
         game1.piece.rotate("CW")
         cur_rotation += 1
-    print("aggregate height:", best_data[0], "line cleared:", best_data[1],
-          "holes:", best_data[2], "bumpiness:", best_data[3], 'highest height:', best_data[4], 'value:', best_data[5])
-    print(best_blockMat)
+        print("Best rating of rotation", x, "of all columns", best_data[5])
+    # print("aggregate height:", best_data[0], "line cleared:", best_data[1],
+    #       "holes:", best_data[2], "bumpiness:", best_data[3], 'highest height:', best_data[4], 'value:', best_data[5])
+    print("Overall best rating:", best_data[5])
+    # print(best_blockMat)
     return best_position, best_rotation
 
 
